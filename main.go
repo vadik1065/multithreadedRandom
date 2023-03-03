@@ -4,11 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"sync"
 	"time"
 )
-
-var wg sync.WaitGroup
 
 // вывод среза
 func printSlice(s *[]int) {
@@ -26,20 +23,14 @@ func contains(numbers []int, number int) bool {
 }
 
 // генирим рандомное число
-func addToArrayRandomNumber(randomNumbers *[]int, minNumber *int, maxNumber *int) {
-	fmt.Println("init")
-
+func getRandomNumber(c *chan int, minNumber *int, maxNumber *int) {
+	// fmt.Println("init")
 	// time.Sleep(1 * time.Second)
 	number := rand.Intn(*maxNumber-*minNumber) + *minNumber
-	fmt.Println(number)
-	if !contains(*randomNumbers, number) {
-		*randomNumbers = append(*randomNumbers, number)
-	}
-	defer wg.Done()
+	*c <- number
 }
 
 func main() {
-	var randomNumbers []int
 
 	// парсим флаги
 
@@ -50,14 +41,26 @@ func main() {
 
 	// fmt.Println(*countBlock)
 
-	// потоки с раномными числами
+	// потоки с рандомными числами
+	var channels []chan int
 	rand.Seed(time.Now().UnixNano())
-	for i := 1; i <= *countBlock; i++ {
-		wg.Add(1)
-		go addToArrayRandomNumber(&randomNumbers, minNumber, maxNumber)
+	for i := 0; i < *countBlock; i++ {
+		fmt.Println("iiii")
+		fmt.Println(i)
+		c := make(chan int)
+		channels = append(channels, c)
+		go getRandomNumber(&channels[i], minNumber, maxNumber)
 	}
-	wg.Wait()
 
-	printSlice(&randomNumbers)
+	var outputNumber []int
+
+	for _, c := range channels {
+		number := <-c
+		if !contains(outputNumber, number) {
+			outputNumber = append(outputNumber, number)
+		}
+	}
+
+	printSlice(&outputNumber)
 
 }
