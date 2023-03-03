@@ -1,0 +1,1 @@
+go run .\main.go --count="3" --min="1" --max="10"
