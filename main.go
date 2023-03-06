@@ -4,18 +4,15 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"sync"
 	"time"
 )
 
-var wg sync.WaitGroup
-
-// вывод среза
+//printSlice - вывод среза
 func printSlice(s *[]int) {
 	fmt.Printf(" %v\n", *s)
 }
 
-// включает ли срез элимент
+// contains - включает ли срез элимент
 func contains(numbers []int, number int) bool {
 	for _, v := range numbers {
 		if v == number {
@@ -25,39 +22,60 @@ func contains(numbers []int, number int) bool {
 	return false
 }
 
-// генирим рандомное число
-func addToArrayRandomNumber(randomNumbers *[]int, minNumber *int, maxNumber *int) {
-	fmt.Println("init")
-
-	// time.Sleep(1 * time.Second)
-	number := rand.Intn(*maxNumber-*minNumber) + *minNumber
-	fmt.Println(number)
-	if !contains(*randomNumbers, number) {
-		*randomNumbers = append(*randomNumbers, number)
+// getRandomNumber - генирим рандомное число
+func getRandomNumber(c *chan int, minNumber int, maxNumber int, res *bool) {
+	for !*res {
+		number := rand.Intn(maxNumber-minNumber) + minNumber
+		*c <- number // если буфер не пуст то останавливается
+		fmt.Printf("generate %d \n", number)
+		// time.Sleep(time.Duration(number) * time.Second)
 	}
-	defer wg.Done()
+}
+
+// awaitFillArrayNumbers - ждёт заполнение массива различными числами
+func awaitFillArrayNumbers(channels *[]chan int, countNumber int, resChannel *chan bool) {
+	var outputNumber []int
+
+	for len(outputNumber) != countNumber {
+		// time.Sleep(time.Duration(2) * time.Second)
+		for _, c := range *channels {
+			number := <-c
+			if !contains(outputNumber, number) {
+				outputNumber = append(outputNumber, number)
+			}
+		}
+	}
+
+	printSlice(&outputNumber)
+	*resChannel <- true
 }
 
 func main() {
-	var randomNumbers []int
+
+	resChannel := make(chan bool)
+	var res bool
 
 	// парсим флаги
 
-	var countBlock = flag.Int("count", 3, "sets the count block for random func")
-	var minNumber = flag.Int("min", 1, "sets the min number for random func")
-	var maxNumber = flag.Int("max", 10, "sets the max number for random func")
+	var countBlock = flag.Int("blocks", 3, "sets the count block for random func")
+	var countNumber = flag.Int("numbers", 10, "sets the count number for random func")
 	flag.Parse()
+	var minNumber = 0
+	var maxNumber = *countNumber
 
 	// fmt.Println(*countBlock)
 
-	// потоки с раномными числами
+	// потоки с рандомными числами
+	var channels []chan int
 	rand.Seed(time.Now().UnixNano())
-	for i := 1; i <= *countBlock; i++ {
-		wg.Add(1)
-		go addToArrayRandomNumber(&randomNumbers, minNumber, maxNumber)
+	for i := 0; i < *countBlock; i++ {
+		fmt.Println(i)
+		c := make(chan int, 1)
+		channels = append(channels, c)
+		go getRandomNumber(&channels[i], minNumber, maxNumber, &res)
 	}
-	wg.Wait()
 
-	printSlice(&randomNumbers)
+	go awaitFillArrayNumbers(&channels, *countNumber, &resChannel)
+	res = <-resChannel
 
 }
