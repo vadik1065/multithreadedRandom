@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"sync"
 	"time"
 )
 
@@ -23,50 +22,37 @@ func contains(numbers []int, number int) bool {
 	return false
 }
 
-// getRandomNumber - генирим рандомное число
-func getRandomNumber(c *chan int, minNumber int, maxNumber int, res *bool) {
+// generateNumber - генерация чисел для потоков
+func generateNumber(c chan int, minNumber int, maxNumber int) {
 
-	for {
+	number := rand.Intn(maxNumber-minNumber) + minNumber
+	// number := rand.Int()
+	fmt.Printf("generate %d \n", number)
+	// time.Sleep(time.Duration(5) * time.Second)
+	c <- number
 
-		mutex.Lock()
-		resValue := *res
-		mutex.Unlock()
+}
 
-		if !resValue {
-			number := rand.Intn(maxNumber-minNumber) + minNumber
-			*c <- number // если буфер не пуст то останавливается
-			fmt.Printf("generate %d \n", number)
-			// time.Sleep(time.Duration(number) * time.Second)
-		}
+// проверияет колличество цифр в массиве
+func checkCountNumber(countNumber int, number int, goodChannel chan bool, badChannel chan bool) {
+
+	if !contains(outputNumber, number) {
+		outputNumber = append(outputNumber, number)
+	}
+
+	if len(outputNumber) == countNumber {
+		goodChannel <- true
+	} else {
+		badChannel <- true
 	}
 }
 
-// awaitFillArrayNumbers - ждёт заполнение массива различными числами
-func awaitFillArrayNumbers(channels *[]chan int, countNumber int, resChannel *chan bool) {
-	var outputNumber []int
-
-	for len(outputNumber) != countNumber {
-		// time.Sleep(time.Duration(2) * time.Second)
-		for _, c := range *channels {
-			number := <-c
-			if !contains(outputNumber, number) {
-				outputNumber = append(outputNumber, number)
-			}
-		}
-	}
-
-	printSlice(&outputNumber)
-	mutex.Lock()
-	res = true
-	mutex.Unlock()
-	*resChannel <- true
-}
-
-var mutex sync.Mutex
-var res bool
+var outputNumber []int
 
 func main() {
-	resChannel := make(chan bool)
+	numbersChannel := make(chan int)
+	isGenerateChannel := make(chan bool)
+	isResultChannel := make(chan bool)
 
 	// парсим флаги
 
@@ -76,18 +62,24 @@ func main() {
 	var minNumber = 0
 	var maxNumber = *countNumber
 
-	// fmt.Println(*countBlock)
-
-	// потоки с рандомными числами
-	var channels []chan int
 	rand.Seed(time.Now().UnixNano())
+
 	for i := 0; i < *countBlock; i++ {
-		fmt.Println(i)
-		c := make(chan int, 1)
-		channels = append(channels, c)
-		go getRandomNumber(&channels[i], minNumber, maxNumber, &res)
+		go generateNumber(numbersChannel, minNumber, maxNumber)
 	}
 
-	go awaitFillArrayNumbers(&channels, *countNumber, &resChannel)
-	<-resChannel
+	go func() {
+		for {
+			select {
+			case number := <-numbersChannel:
+				go checkCountNumber(*countNumber, number, isResultChannel, isGenerateChannel)
+			case <-isGenerateChannel:
+				go generateNumber(numbersChannel, minNumber, maxNumber)
+			}
+		}
+	}()
+
+	<-isResultChannel
+	printSlice(&outputNumber)
+
 }
