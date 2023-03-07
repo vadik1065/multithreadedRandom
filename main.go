@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -24,11 +25,19 @@ func contains(numbers []int, number int) bool {
 
 // getRandomNumber - генирим рандомное число
 func getRandomNumber(c *chan int, minNumber int, maxNumber int, res *bool) {
-	for !*res {
-		number := rand.Intn(maxNumber-minNumber) + minNumber
-		*c <- number // если буфер не пуст то останавливается
-		fmt.Printf("generate %d \n", number)
-		// time.Sleep(time.Duration(number) * time.Second)
+
+	for {
+
+		mutex.Lock()
+		resValue := *res
+		mutex.Unlock()
+
+		if !resValue {
+			number := rand.Intn(maxNumber-minNumber) + minNumber
+			*c <- number // если буфер не пуст то останавливается
+			fmt.Printf("generate %d \n", number)
+			// time.Sleep(time.Duration(number) * time.Second)
+		}
 	}
 }
 
@@ -47,13 +56,17 @@ func awaitFillArrayNumbers(channels *[]chan int, countNumber int, resChannel *ch
 	}
 
 	printSlice(&outputNumber)
+	mutex.Lock()
+	res = true
+	mutex.Unlock()
 	*resChannel <- true
 }
 
-func main() {
+var mutex sync.Mutex
+var res bool
 
+func main() {
 	resChannel := make(chan bool)
-	var res bool
 
 	// парсим флаги
 
@@ -76,6 +89,5 @@ func main() {
 	}
 
 	go awaitFillArrayNumbers(&channels, *countNumber, &resChannel)
-	res = <-resChannel
-
+	<-resChannel
 }
