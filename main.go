@@ -1,11 +1,23 @@
 package main
 
 import (
-	"flag"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
+	"os"
+	"sync"
 	"time"
 )
+
+var outputNumber []int
+var mutex sync.Mutex
+var stopGenerate bool
+var isGeneration bool
+var countBlock = 3
+var countNumber = 10
 
 //printSlice - вывод среза
 func printSlice(s *[]int) {
@@ -26,10 +38,14 @@ func contains(numbers []int, number int) bool {
 func generateNumber(c chan int, minNumber int, maxNumber int) {
 
 	number := rand.Intn(maxNumber-minNumber) + minNumber
-	// number := rand.Int()
-	fmt.Printf("generate %d \n", number)
 	// time.Sleep(time.Duration(5) * time.Second)
-	c <- number
+	mutex.Lock()
+	goGenerate := !stopGenerate
+	if goGenerate {
+		fmt.Printf("generate %d \n", number)
+		c <- number
+	}
+	mutex.Unlock()
 
 }
 
@@ -41,30 +57,30 @@ func checkCountNumber(countNumber int, number int, goodChannel chan bool, badCha
 	}
 
 	if len(outputNumber) == countNumber {
+		mutex.Lock()
+		stopGenerate = true
+		mutex.Unlock()
 		goodChannel <- true
 	} else {
 		badChannel <- true
 	}
 }
 
-var outputNumber []int
+//newGeneration - новая генирация чисел
+func newGeneration() {
 
-func main() {
+	outputNumber = nil
+	stopGenerate = false
 	numbersChannel := make(chan int)
 	isGenerateChannel := make(chan bool)
 	isResultChannel := make(chan bool)
 
-	// парсим флаги
-
-	var countBlock = flag.Int("blocks", 3, "sets the count block for random func")
-	var countNumber = flag.Int("numbers", 10, "sets the count number for random func")
-	flag.Parse()
 	var minNumber = 0
-	var maxNumber = *countNumber
+	var maxNumber = countNumber
 
 	rand.Seed(time.Now().UnixNano())
 
-	for i := 0; i < *countBlock; i++ {
+	for i := 0; i < countBlock; i++ {
 		go generateNumber(numbersChannel, minNumber, maxNumber)
 	}
 
@@ -72,7 +88,7 @@ func main() {
 		for {
 			select {
 			case number := <-numbersChannel:
-				go checkCountNumber(*countNumber, number, isResultChannel, isGenerateChannel)
+				go checkCountNumber(countNumber, number, isResultChannel, isGenerateChannel)
 			case <-isGenerateChannel:
 				go generateNumber(numbersChannel, minNumber, maxNumber)
 			}
@@ -81,5 +97,44 @@ func main() {
 
 	<-isResultChannel
 	printSlice(&outputNumber)
+}
+
+//startGenerateNumber - начинает генирацию чисел
+func startGenerateNumber(w http.ResponseWriter, r *http.Request) {
+	// http.ServeFile(w, r, "./html/index.html")
+	r.Header.Add("Content-Type", "application/json")
+	isGeneration = true
+
+	body, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		return
+	}
+
+	var myStoredVariable map[string]int
+	err = json.Unmarshal(body, &myStoredVariable)
+
+	if err != nil {
+		return
+	}
+
+	countBlock = myStoredVariable["countBlock"]
+	countNumber = myStoredVariable["countNumber"]
+
+	newGeneration()
+}
+
+func main() {
+
+	http.Handle("/", http.FileServer(http.Dir("./static/")))
+	http.HandleFunc("/api/start_number", startGenerateNumber)
+
+	err := http.ListenAndServe(":80", nil)
+	if errors.Is(err, http.ErrServerClosed) {
+		fmt.Printf("server closed\n")
+	} else if err != nil {
+		fmt.Printf("error starting server: %s\n", err)
+		os.Exit(1)
+	}
 
 }

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мультипоточный генератор</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="./src/css/main.css">
+</head>
+<body>
+
+    <section class="flex-sec">
+        <div class="controls">
+            <form id="form-gen-number">
+                <div class="ranges">
+                    
+                    <div class="range-controller flex-col">
+                        <label> колличество потоков</label>
+                        <input name="countBlock" value="5" type="range" min="1" max="10" />
+                        <span class="range-value" id="value-countBlock">5</span>
+                    </div> 
+                    <div  class="range-controller flex-col">
+                        <label> колличество чисел</label>
+                        <input name="countNumber" value="10" type="range" min="5" max="99999" step="5"/>
+                        <span class="range-value" id="value-countNumber">10</span>
+                    </div>
+                    
+                </div>
+                <button class="btn-gen-numb" type="submit">
+                    генерировать  числа
+                </button>
+            </form>
+        </div>
+
+        <div class="terminal-conteiner">
+            <div id="web-terminal">
+                Начните генерацию
+            </div>
+        </div>
+    </section>
+    
+    <script src="./dist/bundle.js"></script>
+</body>
+</html>
