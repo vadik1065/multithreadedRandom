@@ -38,7 +38,9 @@ func startGenerateNumber(w http.ResponseWriter, r *http.Request) {
 
 	countBlock := myStoredVariable["countBlock"]
 	countNumber := myStoredVariable["countNumber"]
-	generateNumber.NewGeneration(countBlock, countNumber, connSocket)
+	countSleepTime := myStoredVariable["countSleepTime"]
+
+	generateNumber.NewGeneration(connSocket, countBlock, countNumber, countSleepTime)
 }
 
 // wsListenner - слушатель сокета

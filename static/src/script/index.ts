@@ -11,7 +11,6 @@ function onRangesRange(e: Event) {
 
   ranges.querySelector(valueName).textContent = value;
 }
-///api/start_number
 
 //onGenNumbSumbit - отправка запроса на генерацию
 function onGenNumbSumbit(e: Event) {
@@ -20,6 +19,7 @@ function onGenNumbSumbit(e: Event) {
   let fieldNameToValue: { [key: string]: number } = {
     countBlock: 5,
     countNumber: 10,
+    countSleepTime: 0,
   };
 
   let form = e.target as HTMLFormElement;
@@ -43,21 +43,18 @@ function onGenNumbSumbit(e: Event) {
     });
 }
 
+// writeInTerminal - пишет в терминал
 function writeInTerminal(value: string) {
   webTerminal.textContent += value + " ";
   webTerminal.scrollTo(0, webTerminal.scrollHeight);
-  // let child = document.createElement('p')
-  // webTerminal.appendChild(child)
-}
-function clearTerminal() {
-  webTerminal.textContent = "";
-  // let childsP = webTerminal.querySelectorAll('p')
-  // childsP.forEach(childs => {
-  //   webTerminal.removeChild(childs)
-  // })
 }
 
-(async () => {
+// clearTerminal - очищает терминал
+function clearTerminal() {
+  webTerminal.textContent = "";
+}
+
+(() => {
   // ranges.addEventListener('change' ,  onRangesRange)
   ranges.addEventListener("input", onRangesRange);
   document
@@ -74,8 +71,6 @@ function clearTerminal() {
   };
 
   socket.onmessage = function (event) {
-    let data = event.data;
-    console.log(` ${data}`);
-    writeInTerminal(data);
+    writeInTerminal(event.data);
   };
 })();

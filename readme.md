@@ -1,1 +1,2 @@
-go run .\main.go --blocks="3" --numbers="10"
+.\arun.sh
+go run .\main.go 

@@ -16,6 +16,7 @@ var mutexSocket sync.Mutex
 var stopGenerate bool
 var countBlock = 3
 var countNumber = 10
+var countSleepTime = 0
 var connSocket *websocket.Conn
 
 // generateNumber - генерация чисел для потоков
@@ -23,7 +24,9 @@ func generateNumber(c chan int, minNumber int, maxNumber int) {
 
 	number := rand.Intn(maxNumber-minNumber) + minNumber
 	custemUtils.WriteNumberWS(connSocket, &mutexSocket, number)
-	// time.Sleep(time.Duration(5) * time.Second)
+	if countSleepTime != 0 {
+		time.Sleep(time.Duration(countSleepTime) * time.Millisecond)
+	}
 
 	mutex.Lock()
 	goGenerate := !stopGenerate
@@ -54,11 +57,12 @@ func checkCountNumber(countNumber int, number int, goodChannel chan bool, badCha
 }
 
 //newGeneration - новая генирация чисел
-func NewGeneration(countBlockVal int, countNumberVal int, connSocketVal *websocket.Conn) {
+func NewGeneration(connSocketVal *websocket.Conn, countBlockVal int, countNumberVal int, countSleepTimeVal int) {
 
 	countBlock = countBlockVal
 	countNumber = countNumberVal
 	connSocket = connSocketVal
+	countSleepTime = countSleepTimeVal
 	outputNumber = nil
 	stopGenerate = false
 	numbersChannel := make(chan int)
