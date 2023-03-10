@@ -1,5 +1,4 @@
 const path = require('path');
-
 module.exports = {
   entry: './src/script/index.ts',
   module: {
@@ -9,8 +8,13 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
     ],
   },
+  
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
@@ -18,5 +22,5 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
-  mode: 'development'
+  mode: 'development',
 };

@@ -1,3 +1,5 @@
+import "../css/main.css";
+
 const ranges = document.querySelector(".ranges");
 const webTerminal = document.getElementById("web-terminal");
 
