@@ -8,21 +8,24 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 var outputNumber []int
 var mutex sync.Mutex
+var mutexSocket sync.Mutex
 var stopGenerate bool
-var isGeneration bool
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
 var countBlock = 3
 var countNumber = 10
-
-//printSlice - вывод среза
-func printSlice(s *[]int) {
-	fmt.Printf(" %v\n", *s)
-}
+var connSocket *websocket.Conn
 
 // contains - включает ли срез элимент
 func contains(numbers []int, number int) bool {
@@ -34,11 +37,40 @@ func contains(numbers []int, number int) bool {
 	return false
 }
 
+// arrayToString - переводит массив в строку
+func arrayToString(a []int, delim string) string {
+	return "\n" + strings.Replace(fmt.Sprint(a), " ", delim, -1)
+}
+
+//writeNumberWS - запись числа в веб сокет
+func writeNumberWS(number int) {
+	mutexSocket.Lock()
+	err := connSocket.WriteMessage(1, []byte(strconv.Itoa(number)))
+	mutexSocket.Unlock()
+	if err != nil {
+		fmt.Println("Error during message writing:", err)
+	}
+}
+
+//writeNumberWS - запись массива чисел в веб сокет
+func writeNumbersWS(numbers []int) {
+	stringNumbers := arrayToString(numbers, ", ")
+	fmt.Println(stringNumbers)
+	mutexSocket.Lock()
+	err := connSocket.WriteMessage(1, []byte(stringNumbers))
+	mutexSocket.Unlock()
+	if err != nil {
+		fmt.Println("Error during message writing:", err)
+	}
+}
+
 // generateNumber - генерация чисел для потоков
 func generateNumber(c chan int, minNumber int, maxNumber int) {
 
 	number := rand.Intn(maxNumber-minNumber) + minNumber
+	writeNumberWS(number)
 	// time.Sleep(time.Duration(5) * time.Second)
+
 	mutex.Lock()
 	goGenerate := !stopGenerate
 	if goGenerate {
@@ -46,10 +78,9 @@ func generateNumber(c chan int, minNumber int, maxNumber int) {
 		c <- number
 	}
 	mutex.Unlock()
-
 }
 
-// проверияет колличество цифр в массиве
+// проверяет количество цифр в массиве
 func checkCountNumber(countNumber int, number int, goodChannel chan bool, badChannel chan bool) {
 
 	if !contains(outputNumber, number) {
@@ -57,9 +88,11 @@ func checkCountNumber(countNumber int, number int, goodChannel chan bool, badCha
 	}
 
 	if len(outputNumber) == countNumber {
+
 		mutex.Lock()
 		stopGenerate = true
 		mutex.Unlock()
+
 		goodChannel <- true
 	} else {
 		badChannel <- true
@@ -96,18 +129,16 @@ func newGeneration() {
 	}()
 
 	<-isResultChannel
-	printSlice(&outputNumber)
+	writeNumbersWS(outputNumber)
 }
 
-//startGenerateNumber - начинает генирацию чисел
+//startGenerateNumber - начинает генерацию чисел c параметрами полученными из фронта
 func startGenerateNumber(w http.ResponseWriter, r *http.Request) {
-	// http.ServeFile(w, r, "./html/index.html")
 	r.Header.Add("Content-Type", "application/json")
-	isGeneration = true
-
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -115,21 +146,58 @@ func startGenerateNumber(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &myStoredVariable)
 
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
 	countBlock = myStoredVariable["countBlock"]
 	countNumber = myStoredVariable["countNumber"]
-
 	newGeneration()
 }
 
+// wsListenner - слушатель сокета
+func wsListenner(w http.ResponseWriter, r *http.Request) {
+	var err error
+	connSocket, err = upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Print("Error during connection upgradation:", err)
+		return
+	}
+	defer connSocket.Close()
+
+	for {
+		messageType, message, err := connSocket.ReadMessage()
+		if err != nil {
+			fmt.Println("Error during message reading:", err)
+			break
+		}
+		fmt.Printf("Received: %d %s", messageType, message)
+	}
+}
+
+// routing - маршрутизатор
+func routing(mux *http.ServeMux) {
+	mux.Handle("/", http.FileServer(http.Dir("./static/")))
+	mux.HandleFunc("/api/start_number", startGenerateNumber)
+}
+
 func main() {
+	muxBase := http.NewServeMux()
+	muxForSocket := http.NewServeMux()
 
-	http.Handle("/", http.FileServer(http.Dir("./static/")))
-	http.HandleFunc("/api/start_number", startGenerateNumber)
+	go func() {
+		muxForSocket.HandleFunc("/", wsListenner)
+		err := http.ListenAndServe(":8080", muxForSocket)
 
-	err := http.ListenAndServe(":80", nil)
+		if errors.Is(err, http.ErrServerClosed) {
+			fmt.Printf("socket closed\n")
+		} else if err != nil {
+			fmt.Printf("error starting socket: %s\n", err)
+		}
+	}()
+
+	routing(muxBase)
+	err := http.ListenAndServe(":80", muxBase)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {

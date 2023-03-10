@@ -38,7 +38,7 @@
     width: 250px ;
     overflow: hidden;
     -webkit-appearance: none;
-    background-color: rgba(0, 150, 0, 0.44);
+    background-color: rgba(3, 150, 3, 0.699);
     border-radius: 5px;
 }
 
@@ -118,13 +118,38 @@ input[type='range']::-webkit-slider-thumb {
     margin: 30px;
     height: 400px;
     padding: 5px;
-    color: white;
-    font: 1.3rem Inconsolata, monospace;
+    /* color: white; */
+    color: rgb(3, 192, 3);
+    font: 0.8rem Inconsolata, monospace;
     background-color: black;
-    background-image: radial-gradient(
+    /* background-image: radial-gradient(
       rgba(0, 150, 0, 0.75), black 120%
-    );
+    ); */
     min-height: 100px;
+    word-wrap: normal;
+    overflow: auto;
+}
+
+#web-terminal::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+#web-terminal::-webkit-scrollbar-track {
+  --webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+  background-color: #f9f9fd;
+  border-radius: 10px;
+}
+
+#web-terminal::-webkit-scrollbar-thumb {
+  background-color: rgb(3, 150, 3);
+  background-image: -webkit-linear-gradient(45deg,rgba(255, 255, 255, .25) 25%,
+                    transparent 25%,
+                    transparent 50%,
+                    rgba(255, 255, 255, .25) 50%,
+                    rgba(255, 255, 255, .25) 75%,
+                    transparent 75%,
+                    transparent);
 }
 
 @keyframes ring {
