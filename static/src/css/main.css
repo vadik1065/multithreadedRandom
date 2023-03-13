@@ -112,6 +112,24 @@ input[type='range']::-webkit-slider-thumb {
     animation: none;
     display: none;
   }
+
+  .btn-gen-numb:disabled{
+    animation: none;
+    opacity: 0.5;
+    cursor: wait;
+  }
+  
+  .btn-gen-numb:disabled:after{
+    animation: none;
+    display: none;
+  }
+  .btn-gen-numb:disabled::before{
+    display: none;
+    animation: none;
+  }
+  .btn-gen-numb:hover:disabled{
+    border: none;
+  }
   
 #web-terminal{
     /* width: 500px; */
@@ -181,3 +199,21 @@ input[type='range']::-webkit-slider-thumb {
     }
 }
 
+@media screen and (min-width: 1000px) {
+  *{
+    font-size: 25px;
+  }
+
+  .btn-gen-numb{
+    min-width:400px ;
+    padding: 10px 15px;
+  }
+
+  .range-controller input[type="range"]{
+    width: 350px;
+  }
+
+  #web-terminal{
+    width: calc(90vw - 400px);
+  }
+}

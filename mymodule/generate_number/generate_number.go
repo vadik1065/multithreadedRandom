@@ -1,7 +1,6 @@
 package generatenumber
 
 import (
-	"fmt"
 	"math/rand"
 	custemUtils "multithreadedRandom/mymodule/custem_utils"
 	"sync"
@@ -10,44 +9,77 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type SCTinfoForGen struct {
+	countBlock     int
+	countNumber    int
+	countSleepTime int
+	start          bool
+	breakGenerate  bool
+	connSocket     *websocket.Conn
+}
+
+var infoForGen = SCTinfoForGen{
+	countBlock:     3,
+	countNumber:    10,
+	countSleepTime: 0,
+	start:          false,
+	connSocket:     nil,
+	breakGenerate:  false,
+}
+
 var outputNumber []int
 var mutex sync.Mutex
 var mutexSocket sync.Mutex
-var stopGenerate bool
-var countBlock = 3
-var countNumber = 10
-var countSleepTime = 0
-var connSocket *websocket.Conn
+
+func CheckStartGenerate() bool {
+	return infoForGen.start
+}
+
+// SetCountParam -  задаёт изменяемые параменты для Мапа
+func SetCountParam(countBlock int, countNumber int, countSleepTime int) {
+	infoForGen.countBlock = countBlock
+	infoForGen.countNumber = countNumber
+	infoForGen.countSleepTime = countSleepTime
+}
+
+// SetCountParam -  задаёт сокет для Мапа
+func SetSocket(connSocket *websocket.Conn) {
+	infoForGen.connSocket = connSocket
+}
+
+// StopGenerate - останавливает текущую генерацию и запускает новую
+func StopGenerate() {
+	infoForGen.breakGenerate = true
+}
 
 // generateNumber - генерация чисел для потоков
-func generateNumber(c chan int, minNumber int, maxNumber int) {
+func generateNumber(c chan<- int, minNumber int, maxNumber int) {
 
 	number := rand.Intn(maxNumber-minNumber) + minNumber
-	custemUtils.WriteNumberWS(connSocket, &mutexSocket, number)
-	if countSleepTime != 0 {
-		time.Sleep(time.Duration(countSleepTime) * time.Millisecond)
+	custemUtils.WriteNumberWS(infoForGen.connSocket, &mutexSocket, number)
+	if infoForGen.countSleepTime != 0 {
+		time.Sleep(time.Duration(infoForGen.countSleepTime) * time.Millisecond)
 	}
 
 	mutex.Lock()
-	goGenerate := !stopGenerate
-	if goGenerate {
-		fmt.Printf("generate %d \n", number)
+	if infoForGen.start {
+		// fmt.Printf("generate %d \n", number)
 		c <- number
 	}
 	mutex.Unlock()
 }
 
 // проверяет количество цифр в массиве
-func checkCountNumber(countNumber int, number int, goodChannel chan bool, badChannel chan bool) {
+func checkCountNumber(countNumber int, number int, goodChannel chan<- bool, badChannel chan<- bool) {
 
 	if !custemUtils.Contains(outputNumber, number) {
 		outputNumber = append(outputNumber, number)
 	}
 
-	if len(outputNumber) == countNumber {
+	if len(outputNumber) == countNumber || infoForGen.breakGenerate {
 
 		mutex.Lock()
-		stopGenerate = true
+		infoForGen.start = false
 		mutex.Unlock()
 
 		goodChannel <- true
@@ -57,24 +89,21 @@ func checkCountNumber(countNumber int, number int, goodChannel chan bool, badCha
 }
 
 //newGeneration - новая генирация чисел
-func NewGeneration(connSocketVal *websocket.Conn, countBlockVal int, countNumberVal int, countSleepTimeVal int) {
+func NewGeneration() {
 
-	countBlock = countBlockVal
-	countNumber = countNumberVal
-	connSocket = connSocketVal
-	countSleepTime = countSleepTimeVal
 	outputNumber = nil
-	stopGenerate = false
+	infoForGen.start = true
 	numbersChannel := make(chan int)
 	isGenerateChannel := make(chan bool)
 	isResultChannel := make(chan bool)
+	infoForGen.breakGenerate = false
 
 	var minNumber = 0
-	var maxNumber = countNumber
+	var maxNumber = infoForGen.countNumber
 
 	rand.Seed(time.Now().UnixNano())
 
-	for i := 0; i < countBlock; i++ {
+	for i := 0; i < infoForGen.countBlock; i++ {
 		go generateNumber(numbersChannel, minNumber, maxNumber)
 	}
 
@@ -82,7 +111,7 @@ func NewGeneration(connSocketVal *websocket.Conn, countBlockVal int, countNumber
 		for {
 			select {
 			case number := <-numbersChannel:
-				go checkCountNumber(countNumber, number, isResultChannel, isGenerateChannel)
+				go checkCountNumber(infoForGen.countNumber, number, isResultChannel, isGenerateChannel)
 			case <-isGenerateChannel:
 				go generateNumber(numbersChannel, minNumber, maxNumber)
 			}
@@ -90,5 +119,5 @@ func NewGeneration(connSocketVal *websocket.Conn, countBlockVal int, countNumber
 	}()
 
 	<-isResultChannel
-	custemUtils.WriteNumbersWS(connSocket, &mutexSocket, outputNumber)
+	custemUtils.WriteNumbersWS(infoForGen.connSocket, &mutexSocket, outputNumber)
 }

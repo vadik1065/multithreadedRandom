@@ -2,6 +2,7 @@ import "../css/main.css";
 
 const ranges = document.querySelector(".ranges");
 const webTerminal = document.getElementById("web-terminal");
+const btnSumbit = document.querySelector(".btn-gen-numb") as HTMLButtonElement;
 
 //onRange - изменение  ползунка в классе ranges
 function onRangesRange(e: Event) {
@@ -72,7 +73,18 @@ function clearTerminal() {
     console.log(e);
   };
 
+  const clearDisable = (el: HTMLButtonElement) => (el.disabled = false);
+
+  let cleanId: ReturnType<typeof setTimeout>;
+
+  // (btnSumbit as HTMLButtonElement).disabled = true;
+  // console.log(btnSumbit);
+
   socket.onmessage = function (event) {
+    clearTimeout(cleanId);
+    cleanId = setTimeout(clearDisable, 40, btnSumbit);
+    btnSumbit.disabled = true;
+
     writeInTerminal(event.data);
   };
 })();

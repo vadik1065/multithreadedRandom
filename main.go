@@ -20,6 +20,13 @@ var connSocket *websocket.Conn
 
 //startGenerateNumber - начинает генерацию чисел c параметрами полученными из фронта
 func startGenerateNumber(w http.ResponseWriter, r *http.Request) {
+
+	if generateNumber.CheckStartGenerate() {
+		fmt.Print("генерация уже запущена")
+		// generateNumber.StopGenerate()
+		return
+	}
+
 	r.Header.Add("Content-Type", "application/json")
 	body, err := ioutil.ReadAll(r.Body)
 
@@ -40,13 +47,15 @@ func startGenerateNumber(w http.ResponseWriter, r *http.Request) {
 	countNumber := myStoredVariable["countNumber"]
 	countSleepTime := myStoredVariable["countSleepTime"]
 
-	generateNumber.NewGeneration(connSocket, countBlock, countNumber, countSleepTime)
+	generateNumber.SetCountParam(countBlock, countNumber, countSleepTime)
+	generateNumber.NewGeneration()
 }
 
 // wsListenner - слушатель сокета
 func wsListenner(w http.ResponseWriter, r *http.Request) {
-	var err error
-	connSocket, err = upgrader.Upgrade(w, r, nil)
+	connSocket, err := upgrader.Upgrade(w, r, nil)
+	generateNumber.SetSocket(connSocket)
+
 	if err != nil {
 		fmt.Print("Error during connection upgradation:", err)
 		return
