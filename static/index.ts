@@ -1,5 +1,5 @@
 import "./main.css";
-import TerminalControl from "./src/TerminalControl";
+import { TerminalControl } from "./src/TerminalControl";
 
 const prefixIDValue: string = "#value-";
 

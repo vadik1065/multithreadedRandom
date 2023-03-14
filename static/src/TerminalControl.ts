@@ -1,5 +1,5 @@
 // TerminalControl - управление терминалом
-class TerminalControl {
+export class TerminalControl {
   // елемент терминал
   terminal: HTMLElement;
 
@@ -8,15 +8,13 @@ class TerminalControl {
   }
 
   // writeInTerminal - пишет в терминал
-  writeInTerminal(value: string) {
+  writeInTerminal(value: string): void {
     this.terminal.textContent += value + " ";
     this.terminal.scrollTo(0, this.terminal.scrollHeight);
   }
 
   // clearTerminal - очищает терминал
-  clearTerminal() {
+  clearTerminal(): void {
     this.terminal.textContent = "";
   }
 }
-
-export default TerminalControl;
