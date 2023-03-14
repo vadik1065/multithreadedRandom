@@ -159,8 +159,8 @@
     opacity: 1;
   }
   100% {
-    width: 300px;
-    height: 300px;
+    width: 200px;
+    height: 200px;
     opacity: 0;
   }
 }
@@ -181,16 +181,16 @@
     font-size: 25px;
   }
   .btn-gen-numb {
-    min-width: 370px;
+    min-width: 375px;
     padding: 10px 15px;
   }
   .btn-gen-numb::before {
-    min-width: calc(370px + 12px);
+    min-width: calc(375px + 12px);
   }
   .range input[type="range"] {
-    width: 370px;
+    width: 375px;
   }
   #web-terminal {
-    width: calc(90vw - 400px);
+    width: calc(90vw - 375px);
   }
 }

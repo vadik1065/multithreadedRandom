@@ -1,3 +1,5 @@
+@widthControlElem: 250px;
+
 * {
   padding: 0;
   margin: 0;
@@ -25,7 +27,7 @@
 
   input[type="range"] {
     margin-top: 10px;
-    width: 250px;
+    width: @widthControlElem;
     overflow: hidden;
     -webkit-appearance: none;
     background-color: rgba(3, 150, 3, 0.699);
@@ -49,7 +51,7 @@
 
 .btn-gen-numb {
   margin-top: 40px;
-  min-width: 250px;
+  min-width: @widthControlElem;
   min-height: 40px;
   font-family: "Nunito", sans-serif;
   text-transform: uppercase;
@@ -69,7 +71,7 @@
   &::before {
     content: "";
     border-radius: 1000px;
-    min-width: calc(250px + 12px);
+    min-width: calc(@widthControlElem + 12px);
     min-height: calc(40px + 12px);
     border: 6px solid rgba(0, 150, 0, 0.75);
     box-shadow: 0 0 60px rgba(0, 150, 0 0.44);
@@ -181,8 +183,8 @@
     opacity: 1;
   }
   100% {
-    width: 300px;
-    height: 300px;
+    width: @widthControlElem - 50;
+    height: @widthControlElem - 50;
     opacity: 0;
   }
 }
@@ -202,25 +204,27 @@
 }
 
 @media screen and (min-width: 1000px) {
+  @MW1000widthControlElem: @widthControlElem * 1.5;
+
   * {
     font-size: 25px;
   }
 
   .btn-gen-numb {
-    min-width: 370px;
+    min-width: @MW1000widthControlElem;
     padding: 10px 15px;
     &::before {
-      min-width: calc(370px + 12px);
+      min-width: calc(@MW1000widthControlElem + 12px);
     }
   }
 
   .range {
     input[type="range"] {
-      width: 370px;
+      width: @MW1000widthControlElem;
     }
   }
 
   #web-terminal {
-    width: calc(90vw - 400px);
+    width: calc(90vw - @MW1000widthControlElem);
   }
 }

@@ -1,9 +1,44 @@
 {
-  "defaultSeverity": "error",
   "extends": ["tslint:recommended"],
-  "jsRules": {},
   "rules": {
-    "max-line-length": [false]
-  },
-  "rulesDirectory": []
+    "object-literal-sort-keys": false,
+    "jsdoc-format": false,
+    "no-console": false,
+    "no-empty": false,
+    "interface-name": false,
+    "prefer-const": true,
+    "no-reference": true,
+    "ordered-imports": false,
+    "member-ordering": false,
+    "curly": false,
+    "no-submodule-imports": false,
+    "no-implicit-dependencies": false,
+    "no-this-assignment": false,
+    "one-variable-per-declaration": false,
+    "radix": false,
+    "prefer-for-of": false,
+    "object-literal-shorthand": false,
+    "forin": false,
+    "max-classes-per-file": false,
+    "variable-name": [true, "allow-snake-case", "allow-pascal-case"],
+    "no-object-literal-type-assertion": true,
+    "no-var-requires": false,
+    "typedef": [
+      true,
+      "call-signature",
+      "arrow-call-signature",
+      "parameter",
+      "arrow-parameter",
+      "property-declaration",
+      "variable-declaration",
+      "member-variable-declaration"
+    ],
+    "only-arrow-functions": false,
+    "no-eval": false,
+    "prefer-conditional-expression": false,
+    "no-any": true,
+    "no-conditional-assignment": true,
+    "no-namespace": false,
+    "no-default-export": true
+  }
 }

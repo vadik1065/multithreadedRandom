@@ -1,45 +1,58 @@
 import "./main.css";
 import TerminalControl from "./src/TerminalControl";
 
-const prefixIDValue = "#value-";
+const prefixIDValue: string = "#value-";
 
-const IDwebTerminal = "web-terminal";
-const IDForm = "form-gen-number";
+const IDwebTerminal: string = "web-terminal";
+const IDForm: string = "form-gen-number";
 
-const ClassRange = ".range-input";
-const ClassRanges = ".ranges";
-const ClassBtnSubmit = ".btn-gen-numb";
+const ClassRange: string = ".range-input";
+const ClassRanges: string = ".ranges";
+const ClassBtnSubmit: string = ".btn-gen-numb";
 
-const addressForConnectSocket = "ws://127.0.0.1:8080/ws";
+const addressForConnectSocket: string = "ws://127.0.0.1:8080/ws";
 
-const webTerminal = document.getElementById(IDwebTerminal) as HTMLDivElement;
-const webForm = document.getElementById(IDForm) as HTMLFormElement;
-const WebRanges = document.querySelector(ClassRanges) as HTMLInputElement;
-const btnSubmit = document.querySelector(ClassBtnSubmit) as HTMLButtonElement;
+// dgID - сокращение document.getElementById
+function dgID(name: string): HTMLElement {
+  return document.getElementById(name);
+}
 
-const terminal = new TerminalControl(webTerminal);
+// dgID - сокращение document.getElementById
+function dq(name: string): HTMLElement {
+  return document.querySelector(name);
+}
+
+const webTerminal: HTMLDivElement = dgID(IDwebTerminal) as HTMLDivElement;
+const webForm: HTMLFormElement = dgID(IDForm) as HTMLFormElement;
+const WebRanges: HTMLInputElement = dq(ClassRanges) as HTMLInputElement;
+const btnSubmit: HTMLButtonElement = dq(ClassBtnSubmit) as HTMLButtonElement;
+
+const terminal: TerminalControl = new TerminalControl(webTerminal);
 
 class App {
   // задержка перед каждой генерацией
-  delayGeneration;
+  delayGeneration: number;
 
   constructor() {
     this.delayGeneration = 0;
   }
 
   // подключение по сокету
-  connectSocket() {
-    const socket = new WebSocket(addressForConnectSocket);
+  connectSocket(): void {
+    const socket: WebSocket = new WebSocket(addressForConnectSocket);
     let cleanId: ReturnType<typeof setTimeout>;
 
-    socket.onopen = (e) => {
+    socket.onopen = (): void => {
       socket.send("hellWord");
     };
 
-    const clearDisable = (el: HTMLButtonElement) => (el.disabled = false);
+    // clearDisable - убирает свойство недоступности
+    function clearDisable(el: HTMLButtonElement): void {
+      el.disabled = false;
+    }
 
-    socket.onmessage = function (event: MessageEvent<any>) {
-      // clearDisable - убирает свойство недоступности
+    // onmessage - пришло сообщение
+    socket.onmessage = function (event: MessageEvent): void {
       clearTimeout(cleanId);
       cleanId = setTimeout(clearDisable, this.delayGeneration, btnSubmit);
       btnSubmit.disabled = true;
@@ -47,27 +60,26 @@ class App {
       terminal.writeInTerminal(event.data);
     }.bind(this);
 
-    socket.onerror = () => {
-      terminal.writeInTerminal(`произошла ошибка`);
-    };
+    // onerror - пришла ошибка
+    socket.onerror = (): void => terminal.writeInTerminal(`произошла ошибка`);
 
-    socket.onclose = (e) => {
+    // onclose - соединение закрылось
+    socket.onclose = (): void =>
       terminal.writeInTerminal(`соединение закрылось`);
-    };
   }
 
   // changeTextByEvent - меняем текст нужного елемента по событию
-  changeTextByEvent(e: Event) {
-    const inputRange = e.target as HTMLInputElement;
-    const name = inputRange.name;
-    const value = inputRange.value;
-    const valueName = prefixIDValue + name;
+  changeTextByEvent(e: Event): void {
+    const inputRange: HTMLInputElement = e.target as HTMLInputElement;
+    const name: string = inputRange.name;
+    const value: string = inputRange.value;
+    const valueName: string = prefixIDValue + name;
 
     WebRanges.querySelector(valueName).textContent = value;
   }
 
   // onGenNumbSubmit - отправка запроса на генерацию
-  onGenNumbSubmit(e: Event) {
+  onGenNumbSubmit(e: Event): void {
     e.preventDefault();
 
     const fieldNameToValue: { [key: string]: number } = {
@@ -76,11 +88,11 @@ class App {
       countSleepTime: 0
     };
 
-    const form = e.target as HTMLFormElement;
-    const ranges = form.querySelectorAll(ClassRange);
+    const form: HTMLFormElement = e.target as HTMLFormElement;
+    const ranges: NodeListOf<Element> = form.querySelectorAll(ClassRange);
 
-    ranges.forEach((rangeEL) => {
-      const range = rangeEL as HTMLInputElement;
+    ranges.forEach((rangeEL: Element): void => {
+      const range: HTMLInputElement = rangeEL as HTMLInputElement;
       fieldNameToValue[range.name] = +range.value;
     });
 
@@ -93,20 +105,22 @@ class App {
 
     terminal.clearTerminal();
 
-    fetch("/api/start_number", data).catch((evtErr) =>
+    fetch("/api/start_number", data).catch((evtErr: Error): void =>
       terminal.writeInTerminal(`Произошла ошибка: ${evtErr}`)
     );
   }
 
   // run - запуск скрипта
-  run() {
+  run(): void {
     this.connectSocket();
     webForm.addEventListener("submit", this.onGenNumbSubmit.bind(this));
+    console.log(WebRanges);
+
     WebRanges.addEventListener("input", this.changeTextByEvent.bind(this));
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const app = new App();
+document.addEventListener("DOMContentLoaded", (): void => {
+  const app: App = new App();
   app.run();
 });
