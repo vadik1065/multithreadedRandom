@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	generateNumber "multithreadedRandom/mymodule/generate_number"
+	generateNumber "multithreadedRandom/my_module/generate_number"
 )
 
 var upgrader = websocket.Upgrader{
@@ -51,16 +51,16 @@ func startGenerateNumber(w http.ResponseWriter, r *http.Request) {
 	generateNumber.NewGeneration()
 }
 
-// wsListenner - слушатель сокета
-func wsListenner(w http.ResponseWriter, r *http.Request) {
+// wsListener - слушатель сокета
+func wsListener(w http.ResponseWriter, r *http.Request) {
 	connSocket, err := upgrader.Upgrade(w, r, nil)
-	generateNumber.SetSocket(connSocket)
-
+	
 	if err != nil {
 		fmt.Print("Error during connection upgradation:", err)
 		return
 	}
 	defer connSocket.Close()
+	generateNumber.SetSocket(connSocket)
 
 	for {
 		messageType, message, err := connSocket.ReadMessage()
@@ -83,7 +83,8 @@ func main() {
 	muxForSocket := http.NewServeMux()
 
 	go func() {
-		muxForSocket.HandleFunc("/", wsListenner)
+		fmt.Println("connect port 8080")
+		muxForSocket.HandleFunc("/", wsListener)
 		err := http.ListenAndServe(":8080", muxForSocket)
 
 		if errors.Is(err, http.ErrServerClosed) {
@@ -93,6 +94,7 @@ func main() {
 		}
 	}()
 
+	fmt.Println("connect port 80")
 	routing(muxBase)
 	err := http.ListenAndServe(":80", muxBase)
 	if errors.Is(err, http.ErrServerClosed) {

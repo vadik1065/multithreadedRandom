@@ -1,8 +1,8 @@
-package generatenumber
+package generate_number
 
 import (
 	"math/rand"
-	custemUtils "multithreadedRandom/mymodule/custem_utils"
+	customUtils "multithreadedRandom/my_module/custom_utils"
 	"sync"
 	"time"
 
@@ -10,7 +10,7 @@ import (
 )
 
 type SCTinfoForGen struct {
-	countBlock     int
+	countBlock     int 
 	countNumber    int
 	countSleepTime int
 	start          bool
@@ -35,7 +35,7 @@ func CheckStartGenerate() bool {
 	return infoForGen.start
 }
 
-// SetCountParam -  задаёт изменяемые параменты для Мапа
+// SetCountParam - задаёт изменяемые параметры для Мапа
 func SetCountParam(countBlock int, countNumber int, countSleepTime int) {
 	infoForGen.countBlock = countBlock
 	infoForGen.countNumber = countNumber
@@ -56,7 +56,7 @@ func StopGenerate() {
 func generateNumber(c chan<- int, minNumber int, maxNumber int) {
 
 	number := rand.Intn(maxNumber-minNumber) + minNumber
-	custemUtils.WriteNumberWS(infoForGen.connSocket, &mutexSocket, number)
+	customUtils.WriteNumberWS(infoForGen.connSocket, &mutexSocket, number)
 	if infoForGen.countSleepTime != 0 {
 		time.Sleep(time.Duration(infoForGen.countSleepTime) * time.Millisecond)
 	}
@@ -72,7 +72,7 @@ func generateNumber(c chan<- int, minNumber int, maxNumber int) {
 // проверяет количество цифр в массиве
 func checkCountNumber(countNumber int, number int, goodChannel chan<- bool, badChannel chan<- bool) {
 
-	if !custemUtils.Contains(outputNumber, number) {
+	if !customUtils.Contains(outputNumber, number) {
 		outputNumber = append(outputNumber, number)
 	}
 
@@ -88,7 +88,7 @@ func checkCountNumber(countNumber int, number int, goodChannel chan<- bool, badC
 	}
 }
 
-//newGeneration - новая генирация чисел
+//newGeneration - новая генерация чисел
 func NewGeneration() {
 
 	outputNumber = nil
@@ -119,5 +119,5 @@ func NewGeneration() {
 	}()
 
 	<-isResultChannel
-	custemUtils.WriteNumbersWS(infoForGen.connSocket, &mutexSocket, outputNumber)
+	customUtils.WriteNumbersWS(infoForGen.connSocket, &mutexSocket, outputNumber)
 }

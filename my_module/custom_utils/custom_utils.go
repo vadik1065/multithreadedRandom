@@ -1,4 +1,4 @@
-package custemutils
+package customutils
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// contains - включает ли срез элимент
+// contains - содержит ли срез элемент
 func Contains(numbers []int, number int) bool {
 	for _, v := range numbers {
 		if v == number {

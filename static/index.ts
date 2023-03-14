@@ -6,21 +6,21 @@ const prefixIDValue = "#value-";
 const IDwebTerminal = "web-terminal";
 const IDForm = "form-gen-number";
 
-const ClassRange = ".control-range";
+const ClassRange = ".range-input";
 const ClassRanges = ".ranges";
 const ClassBtnSubmit = ".btn-gen-numb";
 
-const addresForConnectSocket = "ws://127.0.0.1:8080/ws";
+const addressForConnectSocket = "ws://127.0.0.1:8080/ws";
 
 const webTerminal = document.getElementById(IDwebTerminal) as HTMLDivElement;
 const webForm = document.getElementById(IDForm) as HTMLFormElement;
 const WebRanges = document.querySelector(ClassRanges) as HTMLInputElement;
-const btnSumbit = document.querySelector(ClassBtnSubmit) as HTMLButtonElement;
+const btnSubmit = document.querySelector(ClassBtnSubmit) as HTMLButtonElement;
 
 const terminal = new TerminalControl(webTerminal);
 
 class App {
-  // задержка перед каждой генирацией
+  // задержка перед каждой генерацией
   delayGeneration;
 
   constructor() {
@@ -29,7 +29,7 @@ class App {
 
   // подключение по сокету
   connectSocket() {
-    const socket = new WebSocket(addresForConnectSocket);
+    const socket = new WebSocket(addressForConnectSocket);
     let cleanId: ReturnType<typeof setTimeout>;
 
     socket.onopen = (e) => {
@@ -41,8 +41,8 @@ class App {
     socket.onmessage = function (event: MessageEvent<any>) {
       // clearDisable - убирает свойство недоступности
       clearTimeout(cleanId);
-      cleanId = setTimeout(clearDisable, this.delayGeneration, btnSumbit);
-      btnSumbit.disabled = true;
+      cleanId = setTimeout(clearDisable, this.delayGeneration, btnSubmit);
+      btnSubmit.disabled = true;
 
       terminal.writeInTerminal(event.data);
     }.bind(this);
@@ -66,8 +66,8 @@ class App {
     WebRanges.querySelector(valueName).textContent = value;
   }
 
-  // onGenNumbSumbit - отправка запроса на генерацию
-  onGenNumbSumbit(e: Event) {
+  // onGenNumbSubmit - отправка запроса на генерацию
+  onGenNumbSubmit(e: Event) {
     e.preventDefault();
 
     const fieldNameToValue: { [key: string]: number } = {
@@ -101,7 +101,7 @@ class App {
   // run - запуск скрипта
   run() {
     this.connectSocket();
-    webForm.addEventListener("submit", this.onGenNumbSumbit.bind(this));
+    webForm.addEventListener("submit", this.onGenNumbSubmit.bind(this));
     WebRanges.addEventListener("input", this.changeTextByEvent.bind(this));
   }
 }
