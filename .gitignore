@@ -1,5 +1,5 @@
 static/node_modules
 static/dist
-static/package-lock
+static/package-lock.json
 .vscode
 arun.sh
