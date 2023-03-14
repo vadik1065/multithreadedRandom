@@ -18,6 +18,8 @@ var upgrader = websocket.Upgrader{
 }
 var connSocket *websocket.Conn
 
+const DIRECT_FOR_HTML = "./static/dist/";
+
 //startGenerateNumber - начинает генерацию чисел c параметрами полученными из фронта
 func startGenerateNumber(w http.ResponseWriter, r *http.Request) {
 
@@ -56,7 +58,7 @@ func wsListener(w http.ResponseWriter, r *http.Request) {
 	connSocket, err := upgrader.Upgrade(w, r, nil)
 	
 	if err != nil {
-		fmt.Print("Error during connection upgradation:", err)
+		fmt.Printf("Error during connection upgradation: %s", err)
 		return
 	}
 	defer connSocket.Close()
@@ -74,7 +76,7 @@ func wsListener(w http.ResponseWriter, r *http.Request) {
 
 // routing - маршрутизатор
 func routing(mux *http.ServeMux) {
-	mux.Handle("/", http.FileServer(http.Dir("./static/")))
+	mux.Handle("/", http.FileServer(http.Dir(DIRECT_FOR_HTML)))
 	mux.HandleFunc("/api/start_number", startGenerateNumber)
 }
 

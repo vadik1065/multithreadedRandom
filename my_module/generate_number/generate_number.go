@@ -9,13 +9,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// информация об генерации
 type SCTinfoForGen struct {
-	countBlock     int 
-	countNumber    int
-	countSleepTime int
-	start          bool
-	breakGenerate  bool
-	connSocket     *websocket.Conn
+	countBlock     int  // количество горутин
+	countNumber    int  // количество чисел
+	countSleepTime int  // перерыв между горутинами 
+	start          bool // флаг старта
+	breakGenerate  bool // флаг остановки генерации
+	connSocket     *websocket.Conn // сокет
 }
 
 var infoForGen = SCTinfoForGen{
