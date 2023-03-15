@@ -9,59 +9,55 @@
   </head>
   <body>
     <main>
-      <div>
-        <div class="flex">
-          <div class="controls">
-            <form id="form-gen-number">
-              <div class="ranges">
-                <div class="range flex-col">
-                  <label> количество потоков</label>
-                  <input
-                    class="range-input"
-                    name="countBlock"
-                    value="5"
-                    type="range"
-                    min="1"
-                    max="10"
-                  />
-                  <span class="range-value" id="value-countBlock">5</span>
-                </div>
-                <div class="range flex-col">
-                  <label> количество чисел</label>
-                  <input
-                    class="range-input"
-                    name="countNumber"
-                    value="10"
-                    type="range"
-                    min="5"
-                    max="9999"
-                    step="5"
-                  />
-                  <span class="range-value" id="value-countNumber">10</span>
-                </div>
-                <div class="range flex-col">
-                  <label> задержка </label>
-                  <input
-                    class="range-input"
-                    name="countSleepTime"
-                    value="0"
-                    type="range"
-                    min="0"
-                    max="5000"
-                    step="50"
-                  />
-                  <span class="range-value" id="value-countSleepTime">0</span>
-                </div>
+      <div class="main-container">
+        <div class="main-container_controls">
+          <form class="form-generation" id="form-gen-number">
+            <div class="form-generation_ranges">
+              <div class="range flex-col">
+                <label> количество потоков</label>
+                <input
+                  class="range_input"
+                  name="countBlock"
+                  value="5"
+                  type="range"
+                  min="1"
+                  max="10"
+                />
+                <span class="range_value" id="value-countBlock">5</span>
               </div>
-              <button class="btn-gen-numb" type="submit">
-                генерировать числа
-              </button>
-            </form>
-          </div>
+              <div class="range flex-col">
+                <label> количество чисел</label>
+                <input
+                  class="range_input"
+                  name="countNumber"
+                  value="10"
+                  type="range"
+                  min="5"
+                  max="9999"
+                  step="5"
+                />
+                <span class="range_value" id="value-countNumber">10</span>
+              </div>
+              <div class="range flex-col">
+                <label> задержка </label>
+                <input
+                  class="range_input"
+                  name="countSleepTime"
+                  value="0"
+                  type="range"
+                  min="0"
+                  max="5000"
+                  step="50"
+                />
+                <span class="range_value" id="value-countSleepTime">0</span>
+              </div>
+            </div>
+            <button class="form-generation_btn" type="submit">генерировать числа</button>
+          </form>
+        </div>
 
-          <div class="terminal-conteiner">
-            <div id="web-terminal">Начать генерацию</div>
-          </div>
+        <div class="terminal">
+          <div class="terminal_itself" id="web-terminal">Начать генерацию</div>
         </div>
       </div>
     </main>

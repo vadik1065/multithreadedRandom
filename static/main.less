@@ -6,18 +6,17 @@
   font-size: 16px;
 }
 
-.flex {
+.main-container {
   float: left;
   display: flex;
   flex-direction: row-reverse;
-}
-
-.controls {
-  padding: 5px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  &_controls {
+    padding: 5px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .range {
@@ -43,13 +42,13 @@
     }
   }
 
-  &-value {
+  &_value {
     margin-top: 7px;
     text-align: center;
   }
 }
 
-.btn-gen-numb {
+.form-generation_btn {
   margin-top: 40px;
   min-width: @widthControlElem;
   min-height: 40px;
@@ -132,7 +131,7 @@
   }
 }
 
-#web-terminal {
+.terminal_itself {
   /* width: 500px; */
   width: calc(90vw - 300px);
   margin: 30px;
@@ -190,13 +189,13 @@
 }
 
 @media screen and (max-width: 600px) {
-  .flex {
+  .main-container {
     display: flex;
     flex-direction: column;
     float: none;
   }
 
-  #web-terminal {
+  .terminal_itself {
     margin-left: 3vw;
     width: 88vw;
     height: 60vw;
@@ -210,7 +209,7 @@
     font-size: 25px;
   }
 
-  .btn-gen-numb {
+  .form-generation_btn {
     min-width: @MW1000widthControlElem;
     padding: 10px 15px;
     &::before {
@@ -224,7 +223,7 @@
     }
   }
 
-  #web-terminal {
+  .terminal_itself {
     width: calc(90vw - @MW1000widthControlElem);
   }
 }

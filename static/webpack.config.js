@@ -19,6 +19,10 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"]
+      },
+      {
+        test: /\.less$/i,
+        use: ["style-loader", "css-loader", "less-loader"]
       }
     ]
   },
@@ -31,7 +35,7 @@ module.exports = {
     path: path.resolve(__dirname, "dist")
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "./index.html" }),
+    new HtmlWebpackPlugin({ template: "./index.html", favicon: "./src/favicon.ico" }),
     new FileManagerPlugin({
       events: {
         onStart: {

@@ -1,31 +1,34 @@
-import "./main.css";
+import "./main.less";
 import { TerminalControl } from "./src/TerminalControl";
 
 const prefixIDValue: string = "#value-";
 
+// ID
 const IDwebTerminal: string = "web-terminal";
 const IDForm: string = "form-gen-number";
 
-const ClassRange: string = ".range-input";
-const ClassRanges: string = ".ranges";
-const ClassBtnSubmit: string = ".btn-gen-numb";
+// Классы
+const ClassRange: string = ".range_input";
+const ClassRanges: string = ".form-generation_ranges";
+const ClassBtnSubmit: string = ".form-generation_btn";
 
 const addressForConnectSocket: string = "ws://127.0.0.1:8080/ws";
 
-// dgID - сокращение document.getElementById
-function dgID(name: string): HTMLElement {
-  return document.getElementById(name);
+// dgID - сокращение document.getElementById с нужным типом
+function dgID<T = HTMLElement>(name: string): T {
+  return document.getElementById(name) as unknown as T;
 }
 
-// dgID - сокращение document.getElementById
-function dq(name: string): HTMLElement {
-  return document.querySelector(name);
+// dq - сокращение document.querySelector с нужным типом
+function dq<T = HTMLElement>(name: string): T {
+  return document.querySelector(name) as unknown as T;
 }
 
-const webTerminal: HTMLDivElement = dgID(IDwebTerminal) as HTMLDivElement;
-const webForm: HTMLFormElement = dgID(IDForm) as HTMLFormElement;
-const WebRanges: HTMLInputElement = dq(ClassRanges) as HTMLInputElement;
-const btnSubmit: HTMLButtonElement = dq(ClassBtnSubmit) as HTMLButtonElement;
+// элементы
+const webTerminal: HTMLDivElement = dgID<HTMLDivElement>(IDwebTerminal);
+const webForm: HTMLFormElement = dgID<HTMLFormElement>(IDForm);
+const WebRanges: HTMLInputElement = dq<HTMLInputElement>(ClassRanges);
+const btnSubmit: HTMLButtonElement = dq<HTMLButtonElement>(ClassBtnSubmit);
 
 const terminal: TerminalControl = new TerminalControl(webTerminal);
 
@@ -64,25 +67,28 @@ class App {
     socket.onerror = (): void => terminal.writeInTerminal(`произошла ошибка`);
 
     // onclose - соединение закрылось
-    socket.onclose = (): void =>
-      terminal.writeInTerminal(`соединение закрылось`);
+    socket.onclose = (): void => terminal.writeInTerminal(`соединение закрылось`);
   }
 
   // changeTextByEvent - меняем текст нужного елемента по событию
   changeTextByEvent(e: Event): void {
     const inputRange: HTMLInputElement = e.target as HTMLInputElement;
+    if (!inputRange) return;
     const name: string = inputRange.name;
     const value: string = inputRange.value;
     const valueName: string = prefixIDValue + name;
 
-    WebRanges.querySelector(valueName).textContent = value;
+    const spanForValue: HTMLElement = WebRanges?.querySelector(valueName);
+    if (spanForValue) spanForValue.textContent = value;
   }
 
   // onGenNumbSubmit - отправка запроса на генерацию
   onGenNumbSubmit(e: Event): void {
     e.preventDefault();
 
-    const fieldNameToValue: { [key: string]: number } = {
+    // fieldNameToValue - объект с дефолтными значениями
+    type IFieldNameToValue = { [key: string]: number };
+    const fieldNameToValue: IFieldNameToValue = {
       countBlock: 5,
       countNumber: 10,
       countSleepTime: 0
@@ -91,9 +97,9 @@ class App {
     const form: HTMLFormElement = e.target as HTMLFormElement;
     const ranges: NodeListOf<Element> = form.querySelectorAll(ClassRange);
 
-    ranges.forEach((rangeEL: Element): void => {
+    ranges?.forEach((rangeEL: Element): void => {
       const range: HTMLInputElement = rangeEL as HTMLInputElement;
-      fieldNameToValue[range.name] = +range.value;
+      if (range) fieldNameToValue[range.name] = +range.value;
     });
 
     this.delayGeneration = fieldNameToValue.countSleepTime + 50;
@@ -113,10 +119,8 @@ class App {
   // run - запуск скрипта
   run(): void {
     this.connectSocket();
-    webForm.addEventListener("submit", this.onGenNumbSubmit.bind(this));
-    console.log(WebRanges);
-
-    WebRanges.addEventListener("input", this.changeTextByEvent.bind(this));
+    webForm?.addEventListener("submit", this.onGenNumbSubmit.bind(this));
+    WebRanges?.addEventListener("input", this.changeTextByEvent.bind(this));
   }
 }
 
