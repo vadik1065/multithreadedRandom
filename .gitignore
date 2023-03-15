@@ -3,4 +3,4 @@ static/dist
 static/package-lock.json
 .vscode
 arun.sh
-tslint_copy.json
+tslint_copy.jsonc

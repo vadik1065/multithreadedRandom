@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const FileManagerPlugin = require("filemanager-webpack-plugin");
+const TSLintPlugin = require("tslint-webpack-plugin");
 const path = require("path");
 module.exports = {
   entry: "./index.ts",
@@ -42,6 +43,9 @@ module.exports = {
           delete: ["dist"]
         }
       }
+    }),
+    new TSLintPlugin({
+      files: ["./src/**/*.ts", "index.ts"]
     })
   ],
   mode: "development"
