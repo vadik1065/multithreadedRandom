@@ -1,10 +1,10 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const FileManagerPlugin = require("filemanager-webpack-plugin");
-const TSLintPlugin = require("tslint-webpack-plugin");
-const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin")
+const FileManagerPlugin = require("filemanager-webpack-plugin")
+const TSLintPlugin = require("tslint-webpack-plugin")
+const path = require("path")
 module.exports = {
   entry: "./index.ts",
-  watch: true,
+  watch: false,
   watchOptions: {
     ignored: "**/node_modules",
     aggregateTimeout: 200,
@@ -49,4 +49,4 @@ module.exports = {
     })
   ],
   mode: "development"
-};
+}

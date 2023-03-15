@@ -1,0 +1,56 @@
+@widthControlElem: 250px;
+
+.terminal_itself {
+  width: calc(90vw - 350px);
+  margin: 10px;
+  height: calc((90vw - 350px) * 0.6);
+  padding: 10px 15px;
+  color: rgb(3, 192, 3);
+  font: 0.8rem Inconsolata, monospace;
+  background-color: black;
+  min-height: 100px;
+  word-wrap: normal;
+  overflow: auto;
+  box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.425);
+
+  &::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  &::-webkit-scrollbar-track {
+    --webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+    background-color: #f9f9fd;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(3, 150, 3);
+    background-image: -webkit-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.25) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0.25) 75%,
+      transparent 75%,
+      transparent
+    );
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .terminal_itself {
+    margin-left: 3vw;
+    width: 88vw;
+    height: 60vw;
+  }
+}
+
+@media screen and (min-width: 1000px) {
+  @MW1000widthControlElem: @widthControlElem * 1.5;
+
+  .terminal_itself {
+    width: calc(90vw - @MW1000widthControlElem);
+  }
+}
